@@ -29,21 +29,25 @@ void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
 		// get right vector 
 		const FVector RightDirection = Skateboard->GetRightVector();
 
-		// add forward movement
+		/* add forward movement: If positive, accelerate the movement in the skateboard forward direction
+		 * If negative, decelerate the movement by the decelerationFactor until 0
+		 * */
 		if(MovementVector.Y>0.0f)
 		{
 			MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
 			AddMovementInput(ForwardDirection, MoveForwardValue);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Forward movement 0"));
+			MoveRightValue = MovementVector.X*MoveRightMultiplier;
 		}else
 		{
-			if(GetMovementComponent()->Velocity.Length()>0.0f)
-			{
-				AddMovementInput(ForwardDirection,MovementVector.Y*DecelerationFactor);
-			}
+			GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Forward movement less 0"));
+			MoveRightValue = MovementVector.X*MoveRightNoImpulseMultiplier;
 		}
 		
 		//add right-left movement
-		MoveRightValue = MovementVector.X*MoveRightMultiplier;
 		AddMovementInput(RightDirection, MoveRightValue);
 	}
 }

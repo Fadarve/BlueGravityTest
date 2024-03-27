@@ -35,6 +35,9 @@ private:
 	float MoveRightMultiplier;
 
 	UPROPERTY(EditDefaultsOnly)
+	float MoveRightNoImpulseMultiplier;
+
+	UPROPERTY(EditDefaultsOnly)
 	float DecelerationFactor;
 
 public:
@@ -46,5 +49,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetSKBoardForward() override;
-	
 };
