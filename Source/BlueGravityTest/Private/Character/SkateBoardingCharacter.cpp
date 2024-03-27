@@ -32,25 +32,40 @@ void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
 		/* add forward movement: If positive, accelerate the movement in the skateboard forward direction
 		 * If negative, decelerate the movement by the decelerationFactor until 0
 		 * */
-		if(MovementVector.Y>0.0f)
+		if(GetMovementComponent()->IsFalling())
 		{
-			MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
-			AddMovementInput(ForwardDirection, MoveForwardValue);
-			MoveRightValue = MovementVector.X*MoveRightMultiplier;
+			MoveRightValue = MovementVector.X*MoveRightAirMultiplier;
+			TurnLeftRight(MoveRightValue);
 		}else
 		{
-			if(MovementVector.Y<0.0f)
+			if(MovementVector.Y>0.0f) //Pushing forward
 			{
-				GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
+				MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
+				AddMovementInput(ForwardDirection, MoveForwardValue);
+				MoveRightValue = MovementVector.X*MoveRightMultiplier;
+				TurnLeftRight(MoveRightValue);
+			}else
+			{
+				if(MovementVector.Y<0.0f) //Decelrating
+				{
+					GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
+				}
+				MoveRightValue = MovementVector.X*MoveRightNoImpulseMultiplier;
+				const FRotator direction = TurnLeftRight(MoveRightValue);
+				GetMovementComponent()->Velocity = direction.RotateVector(GetMovementComponent()->Velocity);
 			}
-			MoveRightValue = MovementVector.X*MoveRightNoImpulseMultiplier;
 		}
-		
-		//add right-left movement
-		FRotator NewRotation = FRotator::ZeroRotator;
-		NewRotation.Yaw = MoveRightValue;
-		AddActorLocalRotation(NewRotation);
 	}
+}
+
+FRotator ASkateBoardingCharacter::TurnLeftRight(float Amount)
+{
+	//add right-left movement
+	FRotator NewRotation = FRotator::ZeroRotator;
+	NewRotation.Yaw = MoveRightValue;
+	AddActorLocalRotation(NewRotation);
+
+	return NewRotation;
 }
 
 float ASkateBoardingCharacter::GetMoveForward()

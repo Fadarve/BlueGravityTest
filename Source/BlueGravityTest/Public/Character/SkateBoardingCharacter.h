@@ -24,6 +24,8 @@ public:
 protected:
 	virtual void Move(const FInputActionValue& Value) override;
 
+	FRotator TurnLeftRight(float Amount);
+
 private:
 	float MoveForwardValue;
 	float MoveRightValue;
