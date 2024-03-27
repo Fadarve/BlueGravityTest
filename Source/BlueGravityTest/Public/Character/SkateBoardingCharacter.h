@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SkaterInterface.h"
 #include "BlueGravityTest/BlueGravityTestCharacter.h"
 #include "SkateBoardingCharacter.generated.h"
 
@@ -10,7 +11,7 @@
  * 
  */
 UCLASS()
-class BLUEGRAVITYTEST_API ASkateBoardingCharacter : public ABlueGravityTestCharacter
+class BLUEGRAVITYTEST_API ASkateBoardingCharacter : public ABlueGravityTestCharacter, public ISkaterInterface
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,19 @@ private:
 	float MoveForwardAlpha;
 
 	UPROPERTY(EditDefaultsOnly)
-	float MoveRightMultiplier;;
+	float MoveRightMultiplier;
+
+	UPROPERTY(EditDefaultsOnly)
+	float DecelerationFactor;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual float GetMoveForward() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual FVector GetSKVelocity() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual FVector GetSKBoardForward() override;
 	
 };

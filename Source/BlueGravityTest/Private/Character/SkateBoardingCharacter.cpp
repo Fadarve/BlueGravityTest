@@ -3,6 +3,8 @@
 
 #include "Character/SkateBoardingCharacter.h"
 #include "InputActionValue.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 
 ASkateBoardingCharacter::ASkateBoardingCharacter()
 {
@@ -21,22 +23,45 @@ void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 		// get forward vector
 		const FVector ForwardDirection = Skateboard->GetForwardVector();
 	
 		// get right vector 
 		const FVector RightDirection = Skateboard->GetRightVector();
 
-		// add movement
-		MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
-		AddMovementInput(ForwardDirection, MoveForwardValue);
-
+		// add forward movement
+		if(MovementVector.Y>0.0f)
+		{
+			MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
+			AddMovementInput(ForwardDirection, MoveForwardValue);
+		}else
+		{
+			if(GetMovementComponent()->Velocity.Length()>0.0f)
+			{
+				AddMovementInput(ForwardDirection,MovementVector.Y*DecelerationFactor);
+			}
+		}
+		
+		//add right-left movement
 		MoveRightValue = MovementVector.X*MoveRightMultiplier;
 		AddMovementInput(RightDirection, MoveRightValue);
 	}
 }
+
+float ASkateBoardingCharacter::GetMoveForward()
+{
+	return MoveForwardValue;
+}
+
+FVector ASkateBoardingCharacter::GetSKVelocity()
+{
+	return GetCharacterMovement()->Velocity;
+}
+
+FVector ASkateBoardingCharacter::GetSKBoardForward()
+{
+	return Skateboard->GetForwardVector();
+}
+
+
 
