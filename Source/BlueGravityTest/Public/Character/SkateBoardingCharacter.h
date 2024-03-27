@@ -36,6 +36,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float MoveRightNoImpulseMultiplier;
+	
+	UPROPERTY(EditDefaultsOnly)
+	float MoveRightAirMultiplier;
 
 	UPROPERTY(EditDefaultsOnly)
 	float DecelerationFactor;

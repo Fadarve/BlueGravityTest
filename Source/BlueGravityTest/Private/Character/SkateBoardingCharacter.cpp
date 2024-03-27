@@ -36,19 +36,20 @@ void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
 		{
 			MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
 			AddMovementInput(ForwardDirection, MoveForwardValue);
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Forward movement 0"));
 			MoveRightValue = MovementVector.X*MoveRightMultiplier;
 		}else
 		{
-			GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Forward movement less 0"));
+			if(MovementVector.Y<0.0f)
+			{
+				GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
+			}
 			MoveRightValue = MovementVector.X*MoveRightNoImpulseMultiplier;
 		}
 		
 		//add right-left movement
-		AddMovementInput(RightDirection, MoveRightValue);
+		FRotator NewRotation = FRotator::ZeroRotator;
+		NewRotation.Yaw = MoveRightValue;
+		AddActorLocalRotation(NewRotation);
 	}
 }
 
