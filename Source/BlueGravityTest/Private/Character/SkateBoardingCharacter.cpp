@@ -83,5 +83,10 @@ FVector ASkateBoardingCharacter::GetSKBoardForward()
 	return Skateboard->GetForwardVector();
 }
 
+bool ASkateBoardingCharacter::GetIsFalling()
+{
+	return GetMovementComponent()->IsFalling();
+}
+
 
 

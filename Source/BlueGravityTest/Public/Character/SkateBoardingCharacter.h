@@ -46,12 +46,15 @@ private:
 	float DecelerationFactor;
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	virtual float GetMoveForward() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	virtual FVector GetSKVelocity() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	virtual FVector GetSKBoardForward() override;
+
+	UFUNCTION()
+	virtual bool GetIsFalling() override;
 };
