@@ -5,6 +5,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "EnhancedInputComponent.h"
 
 ASkateBoardingCharacter::ASkateBoardingCharacter()
 {
@@ -25,10 +26,7 @@ void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
 	{
 		// get forward vector
 		const FVector ForwardDirection = Skateboard->GetForwardVector();
-	
-		// get right vector 
-		const FVector RightDirection = Skateboard->GetRightVector();
-
+		
 		/* add forward movement: If positive, accelerate the movement in the skateboard forward direction
 		 * If negative, decelerate the movement by the decelerationFactor until 0
 		 * */
@@ -58,6 +56,30 @@ void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+void ASkateBoardingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+		
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Looking
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlueGravityTestCharacter::Look);
+		
+		// Moving
+		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ASkateBoardingCharacter::TurnDirection);
+		EnhancedInputComponent->BindAction(PushAction, ETriggerEvent::Triggered, this, &ASkateBoardingCharacter::Push);
+		EnhancedInputComponent->BindAction(PushAction, ETriggerEvent::Completed, this, &ASkateBoardingCharacter::StopPushing);
+		EnhancedInputComponent->BindAction(SlowDownAction, ETriggerEvent::Triggered, this, &ASkateBoardingCharacter::SlowDown);
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
 FRotator ASkateBoardingCharacter::TurnLeftRight(float Amount)
 {
 	//add right-left movement
@@ -66,6 +88,61 @@ FRotator ASkateBoardingCharacter::TurnLeftRight(float Amount)
 	AddActorLocalRotation(NewRotation);
 
 	return NewRotation;
+}
+
+void ASkateBoardingCharacter::Push()
+{
+	if (Controller != nullptr)
+	{
+		// get forward vector
+		const FVector ForwardDirection = Skateboard->GetForwardVector();
+
+		if(!GetMovementComponent()->IsFalling())
+		{
+			MoveForwardValue = FMath::Lerp(MoveForwardValue,1.0f,MoveForwardAlpha);
+			AddMovementInput(ForwardDirection, MoveForwardValue);
+		}
+	}
+}
+
+void ASkateBoardingCharacter::StopPushing()
+{
+	MoveForwardValue = 0.0f;
+}
+
+void ASkateBoardingCharacter::SlowDown()
+{
+	GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
+}
+
+void ASkateBoardingCharacter::TurnDirection(const FInputActionValue& Value)
+{
+	// input is a Vector
+	float MovementValue = Value.Get<float>();
+
+	if (Controller != nullptr)
+	{
+		/* add forward movement: If positive, accelerate the movement in the skateboard forward direction
+		 * If negative, decelerate the movement by the decelerationFactor until 0
+		 * */
+		if(GetMovementComponent()->IsFalling())
+		{
+			MoveRightValue = MovementValue*MoveRightAirMultiplier;
+			TurnLeftRight(MoveRightValue);
+		}else
+		{
+			if(MoveForwardValue>0.0f) //Pushing forward
+			{
+				MoveRightValue = MovementValue*MoveRightMultiplier;
+				TurnLeftRight(MoveRightValue);
+			}else
+			{
+				MoveRightValue = MovementValue*MoveRightNoImpulseMultiplier;
+				const FRotator direction = TurnLeftRight(MoveRightValue);
+				GetMovementComponent()->Velocity = direction.RotateVector(GetMovementComponent()->Velocity);
+			}
+		}
+	}
 }
 
 float ASkateBoardingCharacter::GetMoveForward()

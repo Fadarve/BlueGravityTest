@@ -15,16 +15,43 @@ class BLUEGRAVITYTEST_API ASkateBoardingCharacter : public ABlueGravityTestChara
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PushAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SlowDownAction;
+
+	/** Move Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* TurnAction;
+
 public:
 	ASkateBoardingCharacter();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
 	TObjectPtr<USkeletalMeshComponent> Skateboard;
 
+	UFUNCTION()
+	virtual float GetMoveForward() override;
+
+	UFUNCTION()
+	virtual FVector GetSKVelocity() override;
+
+	UFUNCTION()
+	virtual FVector GetSKBoardForward() override;
+
+	UFUNCTION()
+	virtual bool GetIsFalling() override;
+
 protected:
 	virtual void Move(const FInputActionValue& Value) override;
-
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	FRotator TurnLeftRight(float Amount);
+
+	void Push();
+	void StopPushing();
+	void SlowDown();
+	void TurnDirection(const FInputActionValue& Value);
 
 private:
 	float MoveForwardValue;
@@ -44,17 +71,4 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float DecelerationFactor;
-
-public:
-	UFUNCTION()
-	virtual float GetMoveForward() override;
-
-	UFUNCTION()
-	virtual FVector GetSKVelocity() override;
-
-	UFUNCTION()
-	virtual FVector GetSKBoardForward() override;
-
-	UFUNCTION()
-	virtual bool GetIsFalling() override;
 };
