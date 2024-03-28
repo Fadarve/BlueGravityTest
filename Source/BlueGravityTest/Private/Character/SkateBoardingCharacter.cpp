@@ -17,45 +17,6 @@ ASkateBoardingCharacter::ASkateBoardingCharacter()
 	Skateboard->SetupAttachment(GetRootComponent());
 }
 
-void ASkateBoardingCharacter::Move(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// get forward vector
-		const FVector ForwardDirection = Skateboard->GetForwardVector();
-		
-		/* add forward movement: If positive, accelerate the movement in the skateboard forward direction
-		 * If negative, decelerate the movement by the decelerationFactor until 0
-		 * */
-		if(GetMovementComponent()->IsFalling())
-		{
-			MoveRightValue = MovementVector.X*MoveRightAirMultiplier;
-			TurnLeftRight(MoveRightValue);
-		}else
-		{
-			if(MovementVector.Y>0.0f) //Pushing forward
-			{
-				MoveForwardValue = FMath::Lerp(MoveForwardValue,MovementVector.Y,MoveForwardAlpha);
-				AddMovementInput(ForwardDirection, MoveForwardValue);
-				MoveRightValue = MovementVector.X*MoveRightMultiplier;
-				TurnLeftRight(MoveRightValue);
-			}else
-			{
-				if(MovementVector.Y<0.0f) //Decelrating
-				{
-					GetMovementComponent()->Velocity = FMath::Lerp(GetMovementComponent()->Velocity,FVector::Zero(),DecelerationFactor);
-				}
-				MoveRightValue = MovementVector.X*MoveRightNoImpulseMultiplier;
-				const FRotator direction = TurnLeftRight(MoveRightValue);
-				GetMovementComponent()->Velocity = direction.RotateVector(GetMovementComponent()->Velocity);
-			}
-		}
-	}
-}
-
 void ASkateBoardingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -80,7 +41,7 @@ void ASkateBoardingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	}
 }
 
-FRotator ASkateBoardingCharacter::TurnLeftRight(float Amount)
+FRotator ASkateBoardingCharacter::TurnLeftRight()
 {
 	//add right-left movement
 	FRotator NewRotation = FRotator::ZeroRotator;
@@ -128,17 +89,17 @@ void ASkateBoardingCharacter::TurnDirection(const FInputActionValue& Value)
 		if(GetMovementComponent()->IsFalling())
 		{
 			MoveRightValue = MovementValue*MoveRightAirMultiplier;
-			TurnLeftRight(MoveRightValue);
+			TurnLeftRight();
 		}else
 		{
 			if(MoveForwardValue>0.0f) //Pushing forward
 			{
 				MoveRightValue = MovementValue*MoveRightMultiplier;
-				TurnLeftRight(MoveRightValue);
+				TurnLeftRight();
 			}else
 			{
 				MoveRightValue = MovementValue*MoveRightNoImpulseMultiplier;
-				const FRotator direction = TurnLeftRight(MoveRightValue);
+				const FRotator direction = TurnLeftRight();
 				GetMovementComponent()->Velocity = direction.RotateVector(GetMovementComponent()->Velocity);
 			}
 		}

@@ -48,9 +48,11 @@ protected:
 public:
 	ABlueGravityTestCharacter();
 	
+	/** Called for looking input */
+	void Look(const FInputActionValue& Value);
 
 protected:
-
+	
 	/** Called for movement input */
 	virtual void Move(const FInputActionValue& Value);
 	
@@ -66,7 +68,6 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
+	
 };
 

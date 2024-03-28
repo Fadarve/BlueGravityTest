@@ -44,9 +44,9 @@ public:
 	virtual bool GetIsFalling() override;
 
 protected:
-	virtual void Move(const FInputActionValue& Value) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	FRotator TurnLeftRight(float Amount);
+	
+	FRotator TurnLeftRight();
 
 	void Push();
 	void StopPushing();
