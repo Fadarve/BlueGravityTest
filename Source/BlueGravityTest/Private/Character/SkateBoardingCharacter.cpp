@@ -83,9 +83,8 @@ void ASkateBoardingCharacter::TurnDirection(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		/* add forward movement: If positive, accelerate the movement in the skateboard forward direction
-		 * If negative, decelerate the movement by the decelerationFactor until 0
-		 * */
+		/* Rotate the pawn based on their state, different rotation values when pushing, falling and not doing anything
+		 */
 		if(GetMovementComponent()->IsFalling())
 		{
 			MoveRightValue = MovementValue*MoveRightAirMultiplier;
